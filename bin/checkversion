@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+"use strict";
+
+const checker = require('..');
+
+const nconf = require('nconf');
+
+nconf.env().argv();
+
+let remote_promise = Promise.resolve();
+
+if (nconf.get('remote')) {
+  let options = {};
+  if (nconf.get('regex')) {
+    options.regex = nconf.get('regex');
+  }
+  if (nconf.get('header')) {
+    options.header = nconf.get('header');
+  }
+  remote_promise = checker.check_remote(nconf.get('remote'),options);
+}
+
+let s3_promise = Promise.resolve();
+
+if (nconf.get('s3path')) {
+  let header = 'version';
+  if (nconf.get('s3header')) {
+    header = nconf.get('s3header');
+  }
+  s3_promise = checker.check_s3(nconf.get('s3path'),header);
+}
+
+if (nconf.get('print')) {
+  remote_promise.then((val) => console.log("Remote",val));
+  s3_promise.then((val) => console.log("S3",val));
+}
+
+Promise.all([remote_promise,s3_promise]).then(function(vals) {
+  if ( vals[0] !== vals[1] ) {
+    throw new Error("Different values");
+  }
+}).catch(function(err) {
+  if (err.message !== 'Different values') {
+    console.error(err);
+  }
+  process.exit(1);
+}).then(() => process.exit(0));
