@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+"use strict";
+
+const nconf = require('nconf');
+
+nconf.argv().env();
+
+const s3 = require('s3');
+
+let client = s3.createClient({
+  maxAsyncS3: 20,     // this is the default
+  s3RetryCount: 3,    // this is the default
+  s3RetryDelay: 1000, // this is the default
+  multipartUploadThreshold: 20971520, // this is the default (20 MB)
+  multipartUploadSize: 15728640, // this is the default (15 MB)
+  s3options: {
+    region: nconf.get('region') || nconf.get('AWS_DEFAULT_REGION') || 'us-east-1'
+  }
+});
+
+let sourcedir = nconf.get('_')[0];
+
+if ( ! sourcedir ) {
+  console.log("Missing source directory argument");
+  process.exit(1);
+}
+
+if ( ! nconf.get('versionstring') ) {
+  console.log("Missing version string");
+  process.exit(1);
+}
+
+if ( ! nconf.get('bucket') ) {
+  console.log("Missing target bucket");
+  process.exit(1);
+}
+
+let params = {
+  localDir: nconf.get('_')[0],
+  deleteRemoved: false,
+
+  s3Params: {
+    Bucket: nconf.get('bucket'),
+    Prefix: nconf.get('prefix') || '/',
+    Metadata : {}
+    // other options supported by putObject, except Body and ContentLength.
+    // See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#putObject-property
+  },
+};
+
+if (nconf.get('versionstring')) {
+  let version_bits = nconf.get('versionstring').split('_:_');
+  if (version_bits.length < 2) {
+    version_bits = [ 'version',version_bits[0] ];
+  }
+  params.s3Params.Metadata[version_bits[0]] = version_bits[1];
+}
+
+let uploader = client.uploadDir(params);
+uploader.on('error', function(err) {
+  console.error("unable to sync:", err.stack);
+  process.exit(1);
+});
+uploader.on('progress', function() {
+  console.log("progress", uploader.progressAmount, uploader.progressTotal);
+});
+uploader.on('end',function() {
+  console.log("Completed uploading ",sourcedir,"to",nconf.get('bucket')+nconf.get('prefix'));
+  process.exit(0);
+});
