@@ -35,6 +35,10 @@ if (nconf.get('print')) {
   s3_promise.then((val) => console.log("S3",val));
 }
 
+if (nconf.get('print-remote')) {
+  remote_promise.then((val) => console.log(val));
+}
+
 Promise.all([remote_promise,s3_promise]).then(function(vals) {
   if ( vals[0] !== vals[1] ) {
     throw new Error("Different values");
