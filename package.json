@@ -14,7 +14,8 @@
     "s3": "^4.4.0"
   },
   "bin": {
-    "checkversion": "./bin/checkversion"
+    "checkversion": "./bin/checkversion",
+    "uploadfolder": "./bin/uploadfolder"
   },
   "author": "",
   "license": "ISC"
