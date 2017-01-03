@@ -65,6 +65,5 @@ uploader.on('progress', function() {
   console.log("progress", uploader.progressAmount, uploader.progressTotal);
 });
 uploader.on('end',function() {
-  console.log("Completed uploading ",sourcedir,"to",nconf.get('bucket')+nconf.get('prefix'));
-  process.exit(0);
+  console.log("Completed uploading ",sourcedir,"to",nconf.get('bucket')+ "/"+nconf.get('prefix'));
 });
