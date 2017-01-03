@@ -39,6 +39,14 @@ if (nconf.get('print-remote')) {
   remote_promise.then((val) => console.log(val));
 }
 
+let match_exit_code = 0;
+let unmatch_exit_code = 1;
+
+if (nconf.get('fail-on-match')) {
+  match_exit_code = 1;
+  unmatch_exit_code = 0;
+}
+
 Promise.all([remote_promise,s3_promise]).then(function(vals) {
   if ( vals[0] !== vals[1] ) {
     throw new Error("Different values");
@@ -47,5 +55,5 @@ Promise.all([remote_promise,s3_promise]).then(function(vals) {
   if (err.message !== 'Different values') {
     console.error(err);
   }
-  process.exit(1);
-}).then(() => process.exit(0));
+  process.exit(unmatch_exit_code);
+}).then(() => process.exit(match_exit_code));
