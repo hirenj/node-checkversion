@@ -47,8 +47,10 @@ if (nconf.get('fail-on-match')) {
   unmatch_exit_code = 0;
 }
 
+let s3_suffix = nconf.get('s3-version-suffix') || '';
+
 Promise.all([remote_promise,s3_promise]).then(function(vals) {
-  if ( vals[0] !== vals[1] ) {
+  if ( encodeURIComponent(vals[0]+s3_suffix) !== vals[1] ) {
     throw new Error("Different values");
   }
 }).catch(function(err) {

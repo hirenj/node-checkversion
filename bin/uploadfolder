@@ -53,7 +53,7 @@ if (nconf.get('versionstring')) {
   if (version_bits.length < 2) {
     version_bits = [ 'version',version_bits[0] ];
   }
-  params.s3Params.Metadata[version_bits[0]] = version_bits[1];
+  params.s3Params.Metadata[version_bits[0]] = encodeURIComponent(version_bits[1]);
 }
 
 let uploader = client.uploadDir(params);
