@@ -7,7 +7,7 @@ const nconf = require('nconf');
 
 nconf.env().argv();
 
-let remote_promise = Promise.resolve();
+let remote_promise = Promise.resolve(nconf.get('static'));
 
 if (nconf.get('remote')) {
   let options = {};
@@ -22,7 +22,7 @@ if (nconf.get('remote')) {
 
 let s3_promise = Promise.resolve();
 
-if (nconf.get('s3path')) {
+if (nconf.get('s3path') && nconf.get('s3path').indexOf('s3::://') !== 0) {
   let header = 'version';
   if (nconf.get('s3header')) {
     header = nconf.get('s3header');
