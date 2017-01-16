@@ -5,7 +5,7 @@ const checker = require('..');
 
 const nconf = require('nconf');
 
-nconf.env().argv();
+nconf.env().argv({'static' : {'type' : 'string'}});
 
 let remote_promise = Promise.resolve(nconf.get('static'));
 
