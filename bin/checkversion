@@ -7,6 +7,13 @@ const nconf = require('nconf');
 
 nconf.env().argv({'static' : {'type' : 'string'}});
 
+const fs = require('fs');
+const filename = 'VERSION_MATCHING';
+
+let touch_matchversion = () => {
+  fs.closeSync(fs.openSync(filename, 'w'));
+};
+
 let remote_promise = Promise.resolve(nconf.get('static'));
 
 if (nconf.get('remote')) {
@@ -58,4 +65,7 @@ Promise.all([remote_promise,s3_promise]).then(function(vals) {
     console.error(err);
   }
   process.exit(unmatch_exit_code);
-}).then(() => process.exit(match_exit_code));
+}).then(() => {
+  touch_matchversion();
+  process.exit(match_exit_code);
+});
